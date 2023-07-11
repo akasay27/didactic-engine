@@ -1,0 +1,27 @@
+function rc4(msg, key) {
+    // If you need to encode strings instead of `Uint8Array`s you have to
+    // convert them with `new TextEncoder().encode('your message')` before
+    // calling this function.
+    console.assert(msg instanceof Uint8Array);
+    console.assert(key instanceof Uint8Array);
+
+    // setup S-box from key
+    let S = [...new Uint8Array(256).keys()];
+    let j = 0;
+    for (let i = 0; i < 256; ++i) {
+        j = (j + S[i] + key[i % key.length]) % 256;
+        [S[i], S[j]] = [S[j], S[i]];
+    }
+
+    // encode/decode
+    let i = 0;
+    j = 0;
+    let res = new Uint8Array(msg.length);
+    for (let k = 0; k < msg.length; ++k) {
+        i = (i + 1) % 256;
+        j = (j + S[i]) % 256;
+        [S[i], S[j]] = [S[j], S[i]];
+        res[k] = msg[k] ^ S[(S[i] + S[j]) % 256];
+    }
+    return res;
+}
